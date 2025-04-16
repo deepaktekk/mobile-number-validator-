@@ -2192,13 +2192,34 @@ var countryData_default = [
   }
 ];
 
+// src/utils/constants.ts
+var VALIDATION_REGEX = (min, max, isInternational) => {
+  if (isInternational) {
+    return new RegExp(`^(?:\\+?\\d{2,4}[\\s-]*)?\\d{${min},${max}}$`);
+  }
+  return new RegExp(`^\\d{${min},${max}}$`);
+};
+
 // src/functions.ts
-function getCountryDataByCode(countryCode) {
+function getCountryDataByCode({
+  countryCode,
+  mobileNumber,
+  internationalValidation
+}) {
+  const response = {
+    IsError: true,
+    Message: null,
+    ReturnObj: null
+  };
+  if (typeof countryCode === "string") {
+    countryCode = parseInt(countryCode);
+  }
   const country = countryData_default.find(
     (country2) => country2.phoneNumberLengthByCountry_CountryCode === countryCode
   );
   if (!country) {
-    throw new Error(`Country code ${countryCode} not found`);
+    response.Message = "country not found";
+    return response;
   }
   const mappedCountry = {
     country: country.country,
@@ -2206,19 +2227,47 @@ function getCountryDataByCode(countryCode) {
     phLengthMin: country.phoneNumberLengthByCountry_phLengthMin
   };
   if (country.phoneNumberLengthByCountry_phLengthMax && country.phoneNumberLengthByCountry_phLengthMin) {
-    const maxExample = `+${country.phoneNumberLengthByCountry_CountryCode} xxx-${Math.floor(
-      Math.random() * 10 ** (country.phoneNumberLengthByCountry_phLengthMax - 4)
-    )}`;
+    const maxExample = generatePhoneNumberExample(
+      country.phoneNumberLengthByCountry_phLengthMax
+    );
     if (country.phoneNumberLengthByCountry_phLengthMax === country.phoneNumberLengthByCountry_phLengthMin) {
       mappedCountry.phExample = maxExample;
     } else {
-      const minExample = `+${country.phoneNumberLengthByCountry_CountryCode} xxx-${Math.floor(
-        Math.random() * 10 ** (country.phoneNumberLengthByCountry_phLengthMin - 4)
-      )}`;
+      const minExample = generatePhoneNumberExample(
+        country.phoneNumberLengthByCountry_phLengthMin
+      );
       mappedCountry.phExample = `${minExample} , ${maxExample}`;
     }
+    response.Message = "country found";
+    response.IsError = false;
+    if (mobileNumber) {
+      response.Message = "invalid mobile number";
+      response.IsError = true;
+      if (mobileNumber.startsWith("0")) {
+        response.Message = "mobile number should not start with 0";
+      } else {
+        const regex = VALIDATION_REGEX(
+          country.phoneNumberLengthByCountry_phLengthMin,
+          country.phoneNumberLengthByCountry_phLengthMax,
+          internationalValidation
+        );
+        if (regex.test(mobileNumber)) {
+          mappedCountry.validNumber = mobileNumber;
+          response.Message = "valid mobile number";
+          response.IsError = false;
+        }
+      }
+    }
+    response.ReturnObj = mappedCountry;
   }
-  return mappedCountry;
+  return response;
+}
+function generatePhoneNumberExample(length) {
+  let example = "";
+  for (let i = 1; i <= length; i++) {
+    example += (i % 10).toString();
+  }
+  return example;
 }
 export {
   getCountryDataByCode
