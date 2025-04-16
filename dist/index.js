@@ -18,11 +18,11 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/index.ts
-var index_exports = {};
-__export(index_exports, {
+var src_exports = {};
+__export(src_exports, {
   getCountryDataByCode: () => getCountryDataByCode
 });
-module.exports = __toCommonJS(index_exports);
+module.exports = __toCommonJS(src_exports);
 
 // src/assets/countryData.json
 var countryData_default = [
@@ -508,9 +508,9 @@ var countryData_default = [
   },
   {
     country: "Nepal",
-    phoneNumberLengthByCountry_phLengthMax: 10,
+    phoneNumberLengthByCountry_phLengthMax: 9,
     phoneNumberLengthByCountry_phLengthMin: 8,
-    phoneNumberLengthByCountry_phLength: "8 to 10",
+    phoneNumberLengthByCountry_phLength: "8 to 9",
     phoneNumberLengthByCountry_CountryCode: 977,
     phoneNumberLengthByCountry_phLength_InternationalPrefix: 0,
     phoneNumberLengthByCountry_phLength_NationalPrefix: 0,
